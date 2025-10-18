@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+
 	server := gin.Default()
 
 	dbConnection, err := db.ConnectDB()
@@ -17,19 +18,23 @@ func main() {
 		panic(err)
 	}
 
-	productRepository := repository.NewProductRepository(dbConnection)
+	
+	ProductRepository := repository.NewProductRepository(dbConnection)
 
-	productUseCase := usecase.NewProductUsecase(*productRepository)
+	ProductUseCase := usecase.NewProductUseCase(ProductRepository)
 
-	productController := controller.NewProductController(*productUseCase)
+	ProductController := controller.NewProductController(ProductUseCase)
 
-	server.GET("/products", productController.GetProducts)
-
-	server.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+	server.GET("/ping", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
 
-	server.Run(":8080")
+	server.GET("/products", ProductController.GetProducts)
+	server.POST("/product", ProductController.CreateProduct)
+	server.GET("/product/:productId", ProductController.GetProductById)
+
+	server.Run(":8000")
+
 }
